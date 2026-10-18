@@ -24,6 +24,16 @@ app.get('/api/me', authenticate, (req, res) => {
   res.json({ message: 'You are logged in', user: req.user });
 });
 
-app.listen(process.env.PORT, () =>
-  console.log('Server running on port ' + process.env.PORT)
-);
+const initDb = require('./initDb');
+
+initDb()
+  .then(() =>
+    app.listen(process.env.PORT, () =>
+      console.log('Server running on port ' + process.env.PORT)
+    )
+  )
+  .catch((err) => {
+    console.error('Database setup failed', err);
+    process.exit(1);
+  });
+  ;
