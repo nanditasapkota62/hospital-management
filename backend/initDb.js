@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const pool = require('./db');
 
 const statements = [
@@ -68,4 +69,19 @@ module.exports = async function initDb() {
     await pool.query(sql);
   }
   console.log('Database tables ready');
+
+  // Create the first admin from environment variables (only if both are set)
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  if (email && password) {
+    const [rows] = await pool.query('SELECT user_id FROM users WHERE email = ?', [email]);
+    if (!rows.length) {
+      const hash = await bcrypt.hash(password, 10);
+      await pool.query(
+        'INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
+        ['Admin', email, hash, 'admin']
+      );
+      console.log('Admin account created');
+    }
+  }
 };
