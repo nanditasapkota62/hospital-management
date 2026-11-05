@@ -12,6 +12,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    networks:
+      - hospital-net
 
   backend:
     build: ./backend
@@ -30,6 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - hospital-net
 
   frontend:
     build: ./frontend
@@ -37,6 +41,11 @@ services:
       - "8080:80"
     depends_on:
       - backend
+    networks:
+      - hospital-net
+
+networks:
+  hospital-net:
 
 volumes:
   dbdata:
