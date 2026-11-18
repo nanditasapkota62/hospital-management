@@ -15,8 +15,10 @@ services:
     networks:
       - hospital-net
 
-  backend:
-    build: ./backend
+  auth-service:
+    build:
+      context: ./backend/auth-service
+      dockerfile: ../Dockerfile.service
     env_file: ./backend/.env
     environment:
       DB_HOST: db
@@ -24,9 +26,61 @@ services:
       DB_PASSWORD: hospital_root_pw
       DB_NAME: hospital_db
       DB_PORT: 3306
-      PORT: 5000
-    ports:
-      - "5000:5000"
+      PORT: 5001
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hospital-net
+
+  doctor-service:
+    build:
+      context: ./backend/doctor-service
+      dockerfile: ../Dockerfile.service
+    env_file: ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: hospital_root_pw
+      DB_NAME: hospital_db
+      DB_PORT: 3306
+      PORT: 5002
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hospital-net
+
+  appointment-service:
+    build:
+      context: ./backend/appointment-service
+      dockerfile: ../Dockerfile.service
+    env_file: ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: hospital_root_pw
+      DB_NAME: hospital_db
+      DB_PORT: 3306
+      PORT: 5003
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - hospital-net
+
+  patient-service:
+    build:
+      context: ./backend/patient-service
+      dockerfile: ../Dockerfile.service
+    env_file: ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: hospital_root_pw
+      DB_NAME: hospital_db
+      DB_PORT: 3306
+      PORT: 5004
     volumes:
       - uploads:/app/uploads
     depends_on:
@@ -35,12 +89,31 @@ services:
     networks:
       - hospital-net
 
+  gateway:
+    build:
+      context: ./backend/gateway
+      dockerfile: ../Dockerfile.service
+    environment:
+      AUTH_URL: http://auth-service:5001
+      DOCTOR_URL: http://doctor-service:5002
+      APPOINTMENT_URL: http://appointment-service:5003
+      PATIENT_URL: http://patient-service:5004
+    ports:
+      - "5000:5000"
+    depends_on:
+      - auth-service
+      - doctor-service
+      - appointment-service
+      - patient-service
+    networks:
+      - hospital-net
+
   frontend:
     build: ./frontend
     ports:
       - "8080:80"
     depends_on:
-      - backend
+      - gateway
     networks:
       - hospital-net
 
