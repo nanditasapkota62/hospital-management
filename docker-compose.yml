@@ -4,6 +4,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: hospital_root_pw
       MYSQL_DATABASE: hospital_db
+    ports:
+      - "3307:3306"
     volumes:
       - dbdata:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -27,6 +29,8 @@ services:
       DB_NAME: hospital_db
       DB_PORT: 3306
       PORT: 5001
+    ports:
+      - "5001:5001"
     depends_on:
       db:
         condition: service_healthy
@@ -45,6 +49,8 @@ services:
       DB_NAME: hospital_db
       DB_PORT: 3306
       PORT: 5002
+    ports:
+      - "5002:5002"
     depends_on:
       db:
         condition: service_healthy
@@ -63,6 +69,8 @@ services:
       DB_NAME: hospital_db
       DB_PORT: 3306
       PORT: 5003
+    ports:
+      - "5003:5003"
     depends_on:
       db:
         condition: service_healthy
@@ -81,6 +89,8 @@ services:
       DB_NAME: hospital_db
       DB_PORT: 3306
       PORT: 5004
+    ports:
+      - "5004:5004"
     volumes:
       - uploads:/app/uploads
     depends_on:
